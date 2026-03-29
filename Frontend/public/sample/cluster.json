@@ -1,0 +1,6 @@
+[
+  { "cluster_id": "C-01", "cluster_name": "West Delhi Pothole Group", "aggregated_urgency_score": 8.5 },
+  { "cluster_id": "C-02", "cluster_name": "South Delhi Traffic & Infrastructure", "aggregated_urgency_score": 7.2 },
+  { "cluster_id": "C-03", "cluster_name": "East Delhi Sanitation Alert", "aggregated_urgency_score": 6.4 },
+  { "cluster_id": "C-04", "cluster_name": "Central Public Safety Hotspot", "aggregated_urgency_score": 9.1 }
+]

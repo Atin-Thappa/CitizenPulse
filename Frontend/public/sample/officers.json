@@ -1,0 +1,12 @@
+[
+  { "officer_id": 1, "email": "user1@CP.gov.in", "password": "CP_Auth_2026_01" },
+  { "officer_id": 2, "email": "user2@CP.gov.in", "password": "CP_Auth_2026_02" },
+  { "officer_id": 3, "email": "user3@CP.gov.in", "password": "CP_Auth_2026_03" },
+  { "officer_id": 4, "email": "user4@CP.gov.in", "password": "CP_Auth_2026_04" },
+  { "officer_id": 5, "email": "user5@CP.gov.in", "password": "CP_Auth_2026_05" },
+  { "officer_id": 6, "email": "user6@CP.gov.in", "password": "CP_Auth_2026_06" },
+  { "officer_id": 7, "email": "user7@CP.gov.in", "password": "CP_Auth_2026_07" },
+  { "officer_id": 8, "email": "user8@CP.gov.in", "password": "CP_Auth_2026_08" },
+  { "officer_id": 9, "email": "user9@CP.gov.in", "password": "CP_Auth_2026_09" },
+  { "officer_id": 10, "email": "user10@CP.gov.in", "password": "CP_Auth_2026_10" }
+]

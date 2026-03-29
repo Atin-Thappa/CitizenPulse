@@ -1,0 +1,102 @@
+import { useForm } from "react-hook-form"
+import toast, { Toaster } from "react-hot-toast"
+import { useNavigate } from "react-router-dom"
+
+interface FormData{
+    name: string
+    email: string
+    location: string
+    description: string
+}
+
+function CitizenForm(){
+    const {register, handleSubmit,formState:{errors}} = useForm<FormData>()
+    const navigate = useNavigate()
+
+    function onSubmit():void{
+        toast.success("Success! Report Submitted.", {
+            position: "top-right",
+            duration: 2500,
+            style:{
+                border: "1px solid gray",
+                padding: "16px",
+                color: "black"
+            }
+        })
+
+        setTimeout(() => {
+            navigate("/")
+        }, 2750)
+    }
+
+    function handleCancel():void{
+        navigate("/")
+    }
+
+
+    return <div
+    className="flex flex-col items-center text-center flex-1 border-2 border-red-900 justify-around">
+        <Toaster />
+
+        <h1 className="text-5xl font-bold text-center">File a Community Complaint</h1>
+        <form onSubmit={handleSubmit(onSubmit)} className="h-3/5 w-1/3 h-fit">
+            <div className="flex flex-col items-center px-4 py-2 gap-2 h-full w-full justify-around text-lg rounded-lg bg-white ring-2 ring-neutral-400 shadow-2xl ">
+                <label htmlFor="form" className="text-3xl font-semibold text-blue-800">File a Community Complaint</label>
+                <input
+                type="text"
+                id="name"
+                {...register("name",{
+                    required: "Please enter your name"
+                })}
+                className="ring-2 ring-gray-400 w-full rounded-lg text-center p-1"
+                placeholder="[Full Name]"
+                />
+                {errors.name && <p className="text-red-500">{errors.name.message}</p>}
+                <input
+                type="text"
+                id="email"
+                {...register("email", {
+                    required: "Please provide your Email ID",
+                    pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: 'Invalid email adress'
+                    }              
+                })}
+                className="ring-2 ring-gray-400 w-full rounded-lg text-center p-1"
+                placeholder="[Your Email ID]"
+                />
+                {errors.email && <p className="text-red-500">{errors.email.message}</p>}
+                <input
+                type="text"
+                id="location"
+                {...register("location", {required: "Enter location"})}
+                className="ring-2 ring-gray-400 w-full rounded-lg text-center p-1"
+                placeholder="[Location]"
+                />
+                {errors.location && <p className="text-red-500">{errors.location.message}</p>}
+                <textarea
+                id="description"
+                {...register("description", {
+                    required: "Please provide a description of the issue"
+                })}
+                className="ring-2 ring-gray-400 w-full rounded-lg p-1 h-2/1"
+                placeholder="[Description of the issue]"
+                />
+                {errors.description && <p className="text-red-500">{errors.description.message}</p>}
+                <button
+                type="submit"
+                className="cursor-pointer mx-8 flex items-center text-white bg-fuchsia-900 py-2 px-4 rounded-full ring-fuchsia-950 w-full justify-center"
+                >Submit Report</button>
+                <button
+                type="button"
+                onClick={handleCancel}
+                className="cursor-pointer mx-8 flex items-center ring-2 ring-fuchsia-900 text-fuchsia-900 px-4 py-2 rounded-full shadow-lg w-full justify-center"
+                >Cancel</button>
+                <p>DO AUTH and delete this line</p>
+            </div>
+        </form>
+        <div></div>
+    </div>
+}
+
+export default CitizenForm
