@@ -2,6 +2,15 @@ import { useState, useEffect } from "react"
 import { MapContainer, TileLayer, useMap } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
 import L from "leaflet"
+
+delete (L.Icon.Default.prototype as any)._getIconUrl
+
+L.Icon.Default.mergeOptions({
+  iconUrl: "/marker-icon.png",
+  iconRetinaUrl: "/marker-icon-2x.png",
+  shadowUrl: "/marker-shadow.png",
+})
+
 import "leaflet.heat"
 import "leaflet.markercluster"
 import "leaflet.markercluster/dist/MarkerCluster.css"
