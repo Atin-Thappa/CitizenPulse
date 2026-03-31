@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom";
+import api from "../api/client";
 
 interface FormData{
     email: string
@@ -12,23 +13,11 @@ function LoginForm(){
 
 
    async function onSubmit(data: FormData):Promise<void>{
-        try{
-            const response = await fetch("/sample/officers.json")
-
-            if(!response.ok) throw new Error("Could not load Auth")
-
-            const officers = await response.json()
-
-            const isAuthorized = officers.some((officer: any) => officer.email === data.email && officer.password === data.password)
-        
-            if(isAuthorized){
-                navigate("/admin/dashboard");
-            }else{
-                setError("root", {message: "Wrong Credentials"})
-            }
-        }catch(error){
-            console.error("Auth error:", error)
-            alert("Error in AUTH, check console.")
+       const result = await api.login(data.email, data.password)
+       if (result.status === "success") {
+           navigate("/admin/dashboard")
+        } else {
+            setError("root", { message: result.detail || "Wrong Credentials" })
         }
     }
 
@@ -81,7 +70,6 @@ function LoginForm(){
                 className="cursor-pointer mx-8 flex items-center ring-2 ring-fuchsia-900 text-fuchsia-900 px-12 py-2 rounded-full shadow-lg"
                 >Cancel</button>
                 </div>
-                <p>DO AUTH and delete this line</p>
             </div>
         </form>
         <div></div>

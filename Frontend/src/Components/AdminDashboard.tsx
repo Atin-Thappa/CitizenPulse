@@ -2,6 +2,8 @@ import { useState, useEffect } from "react"
 import { MapContainer, TileLayer, useMap } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
 import L from "leaflet"
+import { useLoaderData } from "react-router-dom"
+import { DELHI_DISTRICTS } from "../constants/districts"
 
 delete (L.Icon.Default.prototype as any)._getIconUrl
 
@@ -15,6 +17,7 @@ import "leaflet.heat"
 import "leaflet.markercluster"
 import "leaflet.markercluster/dist/MarkerCluster.css"
 import "leaflet.markercluster/dist/MarkerCluster.Default.css"
+import api from "../api/client"
 
 interface Complaint {
   complaint_id: number
@@ -26,14 +29,6 @@ interface Complaint {
   status: string
 }
 
-const DISTRICT_COORDS: Record<string, [number, number]> = {
-  "West Delhi":    [28.6539, 77.0688],
-  "Dwarka":        [28.5921, 77.0460],
-  "South Delhi":   [28.5244, 77.1855],
-  "North Delhi":   [28.7041, 77.1025],
-  "East Delhi":    [28.6508, 77.2773],
-  "Central Delhi": [28.6448, 77.2167],
-}
 
 const STATUS_COLORS: Record<string, string> = {
   "Pending":     "text-red-400",
@@ -44,6 +39,7 @@ const STATUS_COLORS: Record<string, string> = {
 const CATEGORY_PRIORITY: Record<string, string> = {
   "Infrastructure": "P1",
   "Public Safety":  "P1",
+  "Emergency": "P1",
   "Sanitation":     "P2",
   "Water Supply":   "P2",
   "Traffic":        "P3",
@@ -55,7 +51,7 @@ function HeatmapLayer({ complaints }: { complaints: Complaint[] }) {
 
   useEffect(() => {
     const points = complaints.map(c => {
-      const base = DISTRICT_COORDS[c.district] ?? [28.6139, 77.2090]
+      const base = DELHI_DISTRICTS[c.district] ?? [28.6139, 77.2090]
       return [
         base[0] + (Math.random() - 0.5) * 0.03,
         base[1] + (Math.random() - 0.5) * 0.03,
@@ -83,7 +79,7 @@ function ClusterLayer({ complaints, onSelect }: { complaints: Complaint[], onSel
     const group = (L as any).markerClusterGroup()
 
     complaints.forEach(c => {
-      const base = DISTRICT_COORDS[c.district] ?? [28.6139, 77.2090]
+      const base = DELHI_DISTRICTS[c.district] ?? [28.6139, 77.2090]
       const lat = base[0] + (Math.random() - 0.5) * 0.03
       const lng = base[1] + (Math.random() - 0.5) * 0.03
       const marker = L.marker([lat, lng])
@@ -105,19 +101,27 @@ function AdminDashboard() {
   const [showHeatmap, setShowHeatmap] = useState(true)
   const [statuses, setStatuses] = useState<Record<number, string>>({})
 
+  const { clusters } = useLoaderData() as { clusters: any[], complaints: any[] }
+  
   useEffect(() => {
-    fetch("/sample/complaints.json")
-      .then(r => r.json())
-      .then((data: Complaint[]) => {
-        setComplaints(data)
-        const initial: Record<number, string> = {}
-        data.forEach(c => { initial[c.complaint_id] = c.status })
-        setStatuses(initial)
-      })
+    Promise.all(
+      clusters.map(cl =>
+        fetch(`http://localhost:8000/clusters/${cl.cluster_id}/complaints`, { credentials: "include" })
+        .then(r => r.json())
+        .then(res => (res.complaints || []).map((c: any) => ({ ...c, cluster_id: cl.cluster_id })))
+      )
+    ).then(all => {
+      const flat = all.flat()
+      setComplaints(flat)
+      const initial: Record<number, string> = {}
+      flat.forEach((c: any) => { initial[c.complaint_id] = c.status })
+      setStatuses(initial)
+    })
   }, [])
-
-  function markAs(status: string) {
+    
+  async function markAs(status: string) {
     if (!selected) return
+    await api.updateStatus(selected.complaint_id, status as "Pending" | "In-Progress" | "Resolved")
     setStatuses(prev => ({ ...prev, [selected.complaint_id]: status }))
     setSelected(prev => prev ? { ...prev, status } : null)
   }
@@ -215,7 +219,7 @@ function AdminDashboard() {
             Mark as Resolved
           </button>
           <button
-            onClick={() => markAs("Spam")}
+            onClick={() => markAs("Pending")}
             disabled={!selected}
             className="w-full py-2 rounded-md text-sm font-medium bg-red-700 hover:bg-red-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >

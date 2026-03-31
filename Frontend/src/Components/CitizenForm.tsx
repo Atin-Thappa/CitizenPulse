@@ -1,20 +1,31 @@
 import { useForm } from "react-hook-form"
 import toast, { Toaster } from "react-hot-toast"
 import { useNavigate } from "react-router-dom"
+import { DISTRICT_OPTIONS } from "../constants/districts"
+import api from "../api/client"
 
 interface FormData{
     name: string
     email: string
-    location: string
     description: string
+    category: string
+    location: string
 }
 
 function CitizenForm(){
     const {register, handleSubmit,formState:{errors}} = useForm<FormData>()
     const navigate = useNavigate()
 
-    function onSubmit():void{
-        toast.success("Success! Report Submitted.", {
+    async function onSubmit(data: FormData): Promise<void> {
+  const result = await api.submitComplaint({
+    citizen_name: data.name,
+    citizen_email: data.email,
+    raw_text: data.description,
+    category: data.category,
+    district: data.location,
+  })
+  if (result.complaint_id) {
+    toast.success("Success! Report Submitted.", {
             position: "top-right",
             duration: 2500,
             style:{
@@ -23,11 +34,11 @@ function CitizenForm(){
                 color: "black"
             }
         })
-
-        setTimeout(() => {
-            navigate("/")
-        }, 2750)
-    }
+    setTimeout(() => navigate("/"), 2750)
+  } else {
+    toast.error(result.detail || result.error || "Submission failed.")
+  }
+}
 
     function handleCancel():void{
         navigate("/")
@@ -66,14 +77,24 @@ function CitizenForm(){
                 placeholder="[Your Email ID]"
                 />
                 {errors.email && <p className="text-red-500">{errors.email.message}</p>}
-                <input
-                type="text"
-                id="location"
-                {...register("location", {required: "Enter location"})}
-                className="ring-2 ring-gray-400 w-full rounded-lg text-center p-1"
-                placeholder="[Location]"
-                />
+                <select
+                {...register("location", { required: "Please select a district" })}
+                className="ring-2 ring-gray-400 w-full rounded-lg text-center p-1">
+                    <option value="">Select District</option>
+                    {DISTRICT_OPTIONS.map((d) => (
+                        <option key={d} value={d}>{d}</option>
+                    ))}
+                </select>
                 {errors.location && <p className="text-red-500">{errors.location.message}</p>}
+                <select
+                {...register("category", {required: "Please select a category"})}
+                className="ring-2 ring-gray-400 w-full rounded-lg text-center p-1">
+                    <option value="">Select Category</option>
+                    {["Infrastructure", "Public Safety", "Sanitation", "Water Supply", "Traffic", "Maintenance", "Emergency"].map(c =>(
+                        <option key={c} value={c}>{c}</option>
+                    ))}
+                </select>
+
                 <textarea
                 id="description"
                 {...register("description", {
@@ -92,7 +113,6 @@ function CitizenForm(){
                 onClick={handleCancel}
                 className="cursor-pointer mx-8 flex items-center ring-2 ring-fuchsia-900 text-fuchsia-900 px-4 py-2 rounded-full shadow-lg w-full justify-center"
                 >Cancel</button>
-                <p>DO AUTH and delete this line</p>
             </div>
         </form>
         <div></div>

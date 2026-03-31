@@ -28,12 +28,11 @@ const router = createBrowserRouter([{
             element: <AdminDashboard />,
             loader: async () =>{
               await artificialStall(1500)
-              const [complaints, clusters] = await Promise.all([
-                fetch("/sample/complaints.json").then(res => res.json()),
-                fetch("/sample/cluster.json").then(res => res.json())
+              const [clusters, heatmap] = await Promise.all([
+                fetch("http://localhost:8000/clusters", { credentials: "include" }).then(r => r.json()),
+                fetch("http://localhost:8000/heatmap", { credentials: "include" }).then(r => r.json()),
               ])
-
-              return {complaints, clusters}
+              return {clusters, heatmap}
             } 
           }
         ]
