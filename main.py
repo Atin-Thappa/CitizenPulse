@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Response, HTTPException
 import jwt
 from datetime import datetime, timedelta
+from fastapi import Cookie, Depends
 
 # Import your custom files
 import schema
@@ -8,6 +9,16 @@ import H1
 
 app = FastAPI()
 SECRET_KEY = "your_hackathon_secret_key"
+
+def get_current_user(officer_session: str = Cookie(None)):
+    if not officer_session:
+        raise HTTPException(status_code=401, detail="Not logged in")
+
+    try:
+        payload = jwt.decode(officer_session, SECRET_KEY, algorithms=["HS256"])
+        return payload["email"]
+    except:
+        raise HTTPException(status_code=401, detail="Invalid or expired session")
 
 @app.post("/register-officer")
 async def register(data: schema.RegisterRequest):
@@ -45,10 +56,31 @@ async def complaint(data: schema.ComplaintRequest):
 
 # -------- DASHBOARD --------
 @app.get("/clusters")
-def clusters():
+def clusters(user=Depends(get_current_user)):
     return H1.get_clusters()
 
 
 @app.get("/heatmap")
-def heatmap():
+def heatmap(user=Depends(get_current_user)):
     return H1.get_heatmap()
+
+
+@app.put("/complaint/{complaint_id}/status")
+def update_status(complaint_id: int, status: str):
+    return H1.update_complaint_status(complaint_id, status)
+@app.get("/clusters/{cluster_id}/complaints")
+async def cluster_details(cluster_id: int, user=Depends(get_current_user)):
+    """
+    Only logged-in officers can see the specific 
+    complaints inside a cluster.
+    """
+    details = H1.get_complaints_by_cluster(cluster_id)
+    
+    if not details:
+        raise HTTPException(status_code=404, detail="No complaints found for this cluster")
+        
+    return {
+        "cluster_id": cluster_id,
+        "viewed_by": user,  # This confirms which officer is looking at it
+        "complaints": details
+    }

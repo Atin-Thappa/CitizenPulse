@@ -1,37 +1,51 @@
 import requests
 
-# The URL where your FastAPI is running (default uvicorn port)
-URL = "http://127.0.0.1:8000/login"
+BASE_URL = "http://127.0.0.1:8000"
+session = requests.Session() # This handles cookies automatically
 
-# Change these to match a user already in your 'officers' table
-data = {
-    "email": "officer@gov.in",
-    "password": "password"
+def test_workflow():
+    # 1. Register an Officer
+    print("1. Registering Officer...")
+    reg_data = {"email": "admin@city.gov", "password": "securepassword123"}
+    requests.post(f"{BASE_URL}/register-officer", json=reg_data)
+
+    # 2. Login as Officer
+    print("2. Logging in...")
+    login_data = {"email": "admin@city.gov", "password": "securepassword123"}
+    response = session.post(f"{BASE_URL}/login", json=login_data)
+    print(f"Login Status: {response.status_code}")
+
+    # 3. Submit a Complaint (as a Citizen)
+    # 3. Submit a Complaint
+    print("3. Submitting Complaint...")
+    # INCORRECT (Using commas instead of colons makes it a SET)
+    # CORRECT (Notice the COLONS :)
+    complaint_data = {
+    "citizen_name": "Rahul Kumar",
+    "citizen_email": "rahul@example.com",
+    "raw_text": "Huge fire near the market!",
+    "category": "Emergency",
+    "district": "North Delhi"
 }
+    comp_resp = requests.post(f"{BASE_URL}/complaint", json=complaint_data)
 
-try:
-    # 1. Send the POST request
-    response = requests.post(URL, json=data)
+# ADD THIS LINE TO SEE THE ERROR:
+    if comp_resp.status_code != 200:
+       print(f"SERVER ERROR: {comp_resp.text}") 
+       return
 
-    # 2. Check the results
-    print(f"--- Status Code: {response.status_code} ---")
-    
-    if response.status_code == 200:
-        print("✅ Login Successful!")
-        print(f"Server Response: {response.json()}")
-        print(f"Cookies Received: {response.cookies.get_dict()}")
-    else:
-        print("❌ Login Failed.")
-        print(f"Error Detail: {response.json()}")
+    comp_id = comp_resp.json().get("complaint_id")
 
-except requests.exceptions.ConnectionError:
-    print("❌ Error: Is your FastAPI server running? (Run 'uvicorn main:app --reload' first)")
-URL = "http://127.0.0.1:8000/complaint"
+    # 4. View Dashboard (Officer Only)
+    print("4. Checking Dashboard Clusters...")
+    clusters = session.get(f"{BASE_URL}/clusters")
+    print(f"Found {len(clusters.json())} clusters.")
 
-data = {
-    "citizen_name": "Rahul",
-    "citizen_email": "rahul@gmail.com",
-    "raw_text": "Garbage not collected for 3 days",
-    "category": "Sanitation",
-    "district": "Rohini"
-}
+    # 5. Resolve Complaint
+    print(f"5. Resolving Complaint #{comp_id}...")
+    # Note: Status is passed as a query parameter in your FastAPI put route
+    res = session.put(f"{BASE_URL}/complaint/{comp_id}/status?status=Resolved")
+    print(f"Final Result: {res.json()}")
+
+if __name__ == "__main__":
+    test_workflow()

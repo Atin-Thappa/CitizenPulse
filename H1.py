@@ -3,6 +3,7 @@ import json
 import bcrypt
 import numpy as np
 from sentence_transformers import SentenceTransformer
+from datetime import datetime
 
 DB_PATH = "mydata.db"
 
@@ -141,33 +142,61 @@ def update_cluster_score(cluster_id, urgency):
 def create_complaint(name, email, text, category, district, cluster_id, urgency):
     conn = get_connection()
     cursor = conn.cursor()
+    created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     cursor.execute("""
     INSERT INTO complaints
-    (citizen_name, citizen_email, raw_text, category, district, cluster_id, urgency_score)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (name, email, text, category, district, cluster_id, urgency))
+    (citizen_name, citizen_email, raw_text, category, district, cluster_id, urgency_score,created_at,status)
+    VALUES (?, ?, ?, ?, ?, ?, ? , ? , ?)
+    """, (name, email, text, category, district, cluster_id, urgency,created_at,'pending'))
 
     conn.commit()
     cid = cursor.lastrowid
     conn.close()
     return cid
 def get_urgency(text):
-    text = text.lower()
+    embedding = get_embedding(text)
 
-    if "fire" in text or "accident" in text:
-        return 10
-    elif "water" in text:
-        return 8
-    elif "electricity" in text:
-        return 7
-    elif "garbage" in text:
-        return 6
-    else:
-        return 5
+    # Reference critical patterns
+    critical_cases = [
+        ("fire accident explosion", 10),
+        ("water shortage no water supply", 8),
+        ("electricity failure power outage", 7),
+        ("garbage waste dumping", 6),
+    ]
+
+    max_score = 5  # default
+
+    for case_text, score in critical_cases:
+        case_embedding = get_embedding(case_text)
+        similarity = cosine_similarity(embedding, case_embedding)
+
+        if similarity > 0.6:
+            max_score = max(max_score, score)
+
+    return max_score
+def can_submit_complaint(email, limit=2):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    today = datetime.now().date()
+
+    cursor.execute("""
+    SELECT COUNT(*) FROM complaints
+    WHERE citizen_email=? AND DATE(created_at)=?
+    """, (email, today))
+
+    count = cursor.fetchone()[0]
+    conn.close()
+
+    return count < limit
 
 # ---------------- MAIN PIPELINE ----------------
 def process_complaint(name, email, text, category, district):
+    if not can_submit_complaint(email):
+         return {
+           "error": "Daily complaint limit reached (max 2 per day)"
+        }
 
     # 1. embedding
     embedding = get_embedding(text)
@@ -190,11 +219,13 @@ def process_complaint(name, email, text, category, district):
 
     # 6. update cluster
     update_cluster_score(cluster_id, urgency)
+   
 
     return {
         "complaint_id": complaint_id,
         "cluster_id": cluster_id,
         "urgency": urgency
+        
     }
 
 
@@ -218,3 +249,79 @@ def get_heatmap():
     rows = cursor.fetchall()
     conn.close()
     return [dict(r) for r in rows]
+
+
+import smtplib
+from email.mime.text import MIMEText
+
+def send_resolution_email(to_email, complaint_id):
+    sender_email = "your_email@gmail.com"
+    sender_password = "your_app_password"  # use app password
+
+    subject = "Complaint Resolved"
+    body = f"Your complaint (ID: {complaint_id}) has been resolved. Thank you!"
+
+    msg = MIMEText(body)
+    msg["Subject"] = subject
+    msg["From"] = sender_email
+    msg["To"] = to_email
+
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.send_message(msg)
+        server.quit()
+        return True
+    except Exception as e:
+        print("Email error:", e)
+        return False
+def update_complaint_status(complaint_id, status):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    valid_status = ["Pending", "In-Progress", "Resolved"]
+
+    if status not in valid_status:
+        return {"success": False, "error": "Invalid status"}
+
+    # Update status
+    cursor.execute("""
+    UPDATE complaints
+    SET status=?
+    WHERE complaint_id=?
+    """, (status, complaint_id))
+
+    if cursor.rowcount == 0:
+        conn.close()
+        return {"success": False, "error": "Complaint not found"}
+
+    # If resolved → send email
+    if status == "Resolved":
+        cursor.execute("""
+        SELECT citizen_email FROM complaints WHERE complaint_id=?
+        """, (complaint_id,))
+        result = cursor.fetchone()
+
+        if result:
+            send_resolution_email(result[0], complaint_id)
+
+    conn.commit()
+    conn.close()
+
+    return {"success": True, "message": "Status updated"}
+def get_complaints_by_cluster(cluster_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # We fetch all details so the officer knows WHO to contact and WHERE to go
+    cursor.execute("""
+    SELECT citizen_name, citizen_email, raw_text, district, urgency_score, status, created_at 
+    FROM complaints
+    WHERE cluster_id = ?
+    ORDER BY created_at DESC
+    """, (cluster_id,))
+
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
