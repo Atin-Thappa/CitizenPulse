@@ -4,6 +4,10 @@ import bcrypt
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from datetime import datetime
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 DB_PATH = "mydata.db"
 
@@ -255,8 +259,8 @@ import smtplib
 from email.mime.text import MIMEText
 
 def send_resolution_email(to_email, complaint_id):
-    sender_email = "your_email@gmail.com"
-    sender_password = "your_app_password"  # use app password
+    sender_email = os.getenv("EMAIL_USER")
+    sender_password = os.getenv("EMAIL_PASS")  # use app password
 
     subject = "Complaint Resolved"
     body = f"Your complaint (ID: {complaint_id}) has been resolved. Thank you!"
@@ -316,7 +320,7 @@ def get_complaints_by_cluster(cluster_id):
 
     # We fetch all details so the officer knows WHO to contact and WHERE to go
     cursor.execute("""
-    SELECT citizen_name, citizen_email, raw_text, district, urgency_score, status, created_at 
+    SELECT complaint_id,citizen_name, citizen_email, raw_text, district, urgency_score, status, created_at 
     FROM complaints
     WHERE cluster_id = ?
     ORDER BY created_at DESC
