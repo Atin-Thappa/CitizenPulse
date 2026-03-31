@@ -152,7 +152,7 @@ def create_complaint(name, email, text, category, district, cluster_id, urgency)
     INSERT INTO complaints
     (citizen_name, citizen_email, raw_text, category, district, cluster_id, urgency_score,created_at,status)
     VALUES (?, ?, ?, ?, ?, ?, ? , ? , ?)
-    """, (name, email, text, category, district, cluster_id, urgency,created_at,'pending'))
+    """, (name, email, text, category, district, cluster_id, urgency,created_at,'Pending'))
 
     conn.commit()
     cid = cursor.lastrowid
@@ -320,7 +320,7 @@ def get_complaints_by_cluster(cluster_id):
 
     # We fetch all details so the officer knows WHO to contact and WHERE to go
     cursor.execute("""
-    SELECT complaint_id,citizen_name, citizen_email, raw_text, district, urgency_score, status, created_at 
+    SELECT complaint_id,citizen_name, citizen_email, raw_text,category,district, urgency_score, status, created_at 
     FROM complaints
     WHERE cluster_id = ?
     ORDER BY created_at DESC
