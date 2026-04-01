@@ -14,7 +14,7 @@ function LandingPage(){
     }
 
     return <div
-    className="flex flex-col items-center text-center flex-1 justify-around border-2 border-red-900">
+    className="flex flex-col items-center text-center gap-6 py-6">
         <div>
         <h1 className="font-bold text-4xl">
             Intelligent Infrastructure<br />
@@ -28,8 +28,9 @@ function LandingPage(){
         <img
         src={`${flowchart}`}
         alt="flowchart"
+        className="max-h-64 md:max-h-96 w-auto object-contain"
         />
-        <div className="flex">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
         <button
         className="cursor-pointer mx-8 flex items-center text-white bg-fuchsia-900 p-2 pr-4 rounded-full shadow-xl"
         onClick={handleLogin}

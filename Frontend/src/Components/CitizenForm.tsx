@@ -46,11 +46,11 @@ function CitizenForm(){
 
 
     return <div
-    className="flex flex-col items-center text-center flex-1 border-2 border-red-900 justify-around">
+    className="flex flex-col items-center justify-center text-center flex-1 gap-6 py-8 overflow-y-auto">
         <Toaster />
 
         <h1 className="text-5xl font-bold text-center">File a Community Complaint</h1>
-        <form onSubmit={handleSubmit(onSubmit)} className="h-3/5 w-1/3 h-fit">
+        <form onSubmit={handleSubmit(onSubmit)} className="h-3/5 w-11/12 sm:w-2/3 md:w-1/2 lg:w-1/3 h-fit">
             <div className="flex flex-col items-center px-4 py-2 gap-2 h-full w-full justify-around text-lg rounded-lg bg-white ring-2 ring-neutral-400 shadow-2xl ">
                 <label htmlFor="form" className="text-3xl font-semibold text-blue-800">File a Community Complaint</label>
                 <input
@@ -70,7 +70,7 @@ function CitizenForm(){
                     required: "Please provide your Email ID",
                     pattern: {
                         value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                        message: 'Invalid email adress'
+                        message: 'Invalid email address'
                     }              
                 })}
                 className="ring-2 ring-gray-400 w-full rounded-lg text-center p-1"
@@ -115,7 +115,6 @@ function CitizenForm(){
                 >Cancel</button>
             </div>
         </form>
-        <div></div>
     </div>
 }
 

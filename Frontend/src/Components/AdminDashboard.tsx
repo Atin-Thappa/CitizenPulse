@@ -106,8 +106,7 @@ function AdminDashboard() {
   useEffect(() => {
     Promise.all(
       clusters.map(cl =>
-        fetch(`http://localhost:8000/clusters/${cl.cluster_id}/complaints`, { credentials: "include" })
-        .then(r => r.json())
+        api.getClusterComplaints(cl.cluster_id)
         .then(res => (res.complaints || []).map((c: any) => ({ ...c, cluster_id: cl.cluster_id })))
       )
     ).then(all => {
@@ -132,9 +131,9 @@ function AdminDashboard() {
   )
 
   return (
-    <div className="flex flex-1 w-full overflow-hidden bg-[#0D1B2A]">
+    <div className="flex flex-col lg:flex-row flex-1 w-full overflow-hidden bg-[#0D1B2A]">
 
-      <div className="w-80 min-w-[280px] flex flex-col bg-[#0D1B2A] text-white border-r border-slate-700 overflow-y-auto">
+      <div className="w-full lg:w-80 min-w-[280px] flex flex-col bg-[#0D1B2A] text-white border-r border-slate-700 overflow-y-auto">
 
         <div className="p-4 border-b border-slate-700">
           <h2 className="text-lg font-semibold mb-3">Urgent Reports</h2>
@@ -162,30 +161,6 @@ function AdminDashboard() {
             ))}
           </div>
         </div>
-
-        <div className="p-4 border-b border-slate-700">
-          <label className="flex items-center gap-2 cursor-pointer mb-2 text-sm">
-            <input
-              type="radio"
-              name="mapview"
-              checked={showHeatmap}
-              onChange={() => setShowHeatmap(true)}
-              className="accent-blue-500"
-            />
-            Show Urban Heatmap
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer text-sm">
-            <input
-              type="radio"
-              name="mapview"
-              checked={!showHeatmap}
-              onChange={() => setShowHeatmap(false)}
-              className="accent-blue-500"
-            />
-            Show Categorized Clusters
-          </label>
-        </div>
-
         <div className="p-4 border-b border-slate-700 flex-1">
           {selected ? (
             <div className="flex flex-col gap-1.5 text-sm">
@@ -228,7 +203,7 @@ function AdminDashboard() {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 min-h-[400px] flex flex-col">
 
         <div className="flex justify-center gap-0 p-3 bg-[#0D1B2A]">
           <button

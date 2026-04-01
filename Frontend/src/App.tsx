@@ -6,7 +6,7 @@ import Footer from "./Components/Footer"
 function App(){
   return <div
   style={{backgroundImage: `url(${background})`}}
-  className="h-screen bg-cover bg-center flex flex-col">
+  className="min-h-screen bg-cover bg-center flex flex-col">
     <Navbar />
     <main className="flex-1 flex flex-col">
         <Outlet />
