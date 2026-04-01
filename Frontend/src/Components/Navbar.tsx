@@ -5,7 +5,7 @@ import api from "../api/client"
 function Navbar(){
     const navigate = useNavigate()
     const location = useLocation()
-    const isLoggedIn = location.pathname === "/admin/dashboard"
+    const isLoggedIn = location.pathname === "/admin/dashboard" //temporary
 
     async function handleLogout() {
         try {
