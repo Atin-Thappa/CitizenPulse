@@ -1,0 +1,14 @@
+<<<<<<< HEAD
+mydata.db
+.env
+__pycache__/
+*.pyc
+.cache/
+=======
+mydata.db
+.env
+__pycache__/
+*.pyc
+.cache/
+>>>>>>> fc41aca64f24f5c9b5e21b2bf8ccc7ab4882f74b
+venv/
