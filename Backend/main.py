@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import jwt
 from datetime import datetime, timedelta
 from fastapi import Cookie, Depends
+from dotenv import load_dotenv
+import os
 
 # Import your custom files
 import schema
@@ -12,12 +14,12 @@ import codee
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For hackathon (allow all)
+    allow_origins=["http://localhost:3000","http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-SECRET_KEY = "your_hackathon_secret_key"
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 def get_current_user(officer_session: str = Cookie(None)):
     if not officer_session:
