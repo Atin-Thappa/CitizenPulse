@@ -12,7 +12,7 @@ load_dotenv()
 DB_PATH = "mydata.db"
 
 # Load model once
-model = SentenceTransformer('all-MiniLM-L6-v2')
+model = SentenceTransformer('paraphrase-albert-small-v2')
 
 # ---------------- AUTH ----------------
 def add_officer(email, password):
