@@ -3,9 +3,9 @@ function Footer(){
     return <footer className="flex items-center justify-between text-slate-500 bg-white py-1 px-5">
         <div></div>
         <p>
-            &copy; 2026 Error:500 - ITS-A-HACK 2.0
+            &copy; 2026 No Semicolon: IEEE INNERVE
         </p>
-        <a href="#" className="cursor-pointer" target="_blank"><FaGithub /></a>
+        <a href="https://github.com/Atin-Thappa/CitizenPulse" className="cursor-pointer" target="_blank"><FaGithub /></a>
     </footer>
 }
 
