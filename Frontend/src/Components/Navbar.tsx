@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { SlLogout } from "react-icons/sl"
 import api from "../api/client"
 
@@ -17,10 +17,12 @@ function Navbar(){
     }
 
     return <nav className="bg-white shadow-xl flex items-center justify-between pl-4 pr-6">
-        <div className="flex items-center font-bold cursor-default">
+        <Link to={"/"}>
+        <div className="flex items-center font-bold cursor-pointer">
         <img src="../Logo.png" alt="Logo" />
         <span className="text-gray-900">Citizen</span><span className="text-slate-700">Pulse</span>
         </div>
+        </Link>
         
         {isLoggedIn && (
             <button
