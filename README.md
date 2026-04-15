@@ -1,5 +1,4 @@
-# Create the markdown content as a string
-readme_content = """# CitizenPulse
+# CitizenPulse
 
 CitizenPulse is an AI powered civic intelligence platform built to help city authorities manage public complaints more effectively. In large cities like Delhi, thousands of reports about roads, water, and pollution are filed daily. This system automatically organizes these reports, identifies urgent problems, and helps officers focus on what matters most.
 
