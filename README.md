@@ -83,8 +83,3 @@ The project is divided into two main parts:
 ## Impact
 
 CitizenPulse turns messy data into clear insights. By grouping issues together, it allows authorities to solve one major problem instead of handling hundreds of separate tickets. This leads to faster repairs, better use of public money, and happier citizens. This project was developed as a hackathon project in 2026.
-"""
-
-# Save the content to a .md file
-with open('README.md', 'w') as f:
-    f.write(readme_content)
